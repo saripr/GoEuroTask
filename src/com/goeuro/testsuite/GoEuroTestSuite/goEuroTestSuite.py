@@ -25,7 +25,15 @@ class goEuroTestSuite(unittest.TestCase):
         self.driver.get("http://www.goeuro.com/")
         self.driver.maximize_window()       
                  
-     
+    '''
+    Checks the title of the page.
+    '''         
+    def test_page_title(self):
+        driver=self.driver
+        driver.implicitly_wait(4)
+        expected_title = 'Search & Compare Cheap Buses, Trains & Flights | GoEuro'
+        assert expected_title in driver.title
+
     '''
        Exits the entire browser.
     '''           
