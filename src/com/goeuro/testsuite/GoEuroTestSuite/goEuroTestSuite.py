@@ -6,6 +6,7 @@ Description:Checks the sorting of travel cost between two locations
 
 import unittest
 import time
+import logging
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -77,6 +78,45 @@ class goEuroTestSuite(unittest.TestCase):
         except TimeoutException:
             assert False,"Timeout exception raised" 
         driver.implicitly_wait(10)  
+
+    '''
+       Checks if the prices of all the travel modes are sorted.
+    '''    
+    def test_sort_price(self):
+        logging.basicConfig(level=logging.INFO)
+        driver=self.driver
+        self.test_main_page_search_positive()
+        driver.find_element_by_link_text('Cheapest').click()
+        train="//a[@class='ico-train-2 no-outline']"
+        flight="//a[@class='ico-flight-2 no-outline']"
+        bus="//a[@class='ico-bus-2 no-outline']"
+        closebuttton="//a[@class='close']"
+        xtrain=driver.find_element_by_xpath(train)
+        xflight=driver.find_element_by_xpath(flight)
+        xbus=driver.find_element_by_xpath(bus)
+        xclosebutton=driver.find_element_by_xpath(closebuttton)
+        travelmode=[xtrain,xflight,xbus]
+        for tmode in travelmode:
+            tmode.click()
+            amount="//div[@class='price-cell-content']/span[1]"
+            if(tmode == xflight):
+                time.sleep(4)
+                xclosebutton.click()
+                amount="//div[@class='price-cell-total']/span[1]"
+            logging.info(tmode.text)
+            list_price = []
+            xamount=driver.find_elements_by_xpath(amount)
+            time.sleep(5)
+            for travel_cost in xamount:                   
+                price_text = travel_cost.text[1:]
+                if price_text != '':
+                    list_price.append(float(price_text))
+                    logging.info(price_text)            
+            logging.info(list_price)            
+            if len(list_price) > 0:
+                sorting = all(list_price[i] <= list_price[i+1] for i in range(len(list_price)-1))
+                assert bool(sorting) == True,'Prices not in sorted order'              
+     
 
     '''
        Exits the entire browser.
